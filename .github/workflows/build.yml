@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -3082,3 +3085,11 @@ jobs:
         with:
           name: magnum-apk
           path: cadence/app/build/outputs/apk/release/*.apk
+
+      - name: Publish APK as a release (direct download, no zip)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          apk=$(ls cadence/app/build/outputs/apk/release/*.apk | head -1)
+          cp "$apk" magnum-android.apk
+          gh release create "android-${{ github.run_number }}" magnum-android.apk --repo "${{ github.repository }}" --title "magnum for Android (build ${{ github.run_number }})" --notes "Install magnum-android.apk on your phone or tablet."
